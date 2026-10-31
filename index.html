@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b0d">
+  <meta name="description" content="Slicks &amp; Slides - a retro top-down arcade racing game with a four-car garage, custom paint, AI rivals and an open airfield test facility.">
+  <title>Slicks &amp; Slides - Retro Top-Down Racing</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230d1114'/%3E%3Cpath d='M11 38h42l-6 13H17z' fill='%23ffd447'/%3E%3Cpath d='M19 23h26l7 17H12z' fill='%23f0523d'/%3E%3Ccircle cx='21' cy='45' r='6' fill='%230d1114'/%3E%3Ccircle cx='43' cy='45' r='6' fill='%230d1114'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <div id="game-shell" class="game-shell">
+      <canvas id="game" width="1280" height="720" aria-label="Slicks and Slides racing game"></canvas>
+      <div class="screen-fx" aria-hidden="true"></div>
+
+      <section id="menuScreen" class="overlay menu-overlay">
+        <div class="menu-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> RETRO TOP-DOWN RACING <span class="eyebrow-dot">●</span> EST. 1995</div>
+          <h1 class="game-title"><span class="title-slicks">SLICKS</span><span class="title-and">&amp;</span><span class="title-slides">SLIDES</span></h1>
+          <p class="tagline">SIDEWAYS IS THE FASTEST<br>WAY FORWARD.</p>
+          <p class="intro">Four tiny circuits. Three merciless rivals. One very loose rear end. Keep your foot in it, feather the wheel, and don't let the grass bite.</p>
+
+          <div class="control-deck">
+            <div class="control-title">DRIVER CONTROLS</div>
+            <div class="control-list">
+              <div class="control-item"><span class="keys"><kbd>W</kbd><kbd>↑</kbd></span><span>THROTTLE</span></div>
+              <div class="control-item"><span class="keys"><kbd>S</kbd><kbd>↓</kbd></span><span>BRAKE</span></div>
+              <div class="control-item"><span class="keys"><kbd>A</kbd><kbd>D</kbd></span><span>STEER</span></div>
+              <div class="control-item"><span class="keys"><kbd class="wide">SPACE</kbd></span><span>HANDBRAKE</span></div>
+              <div class="control-item"><span class="keys"><kbd>ESC</kbd></span><span>PAUSE</span></div>
+              <div class="control-item"><span class="keys"><kbd>R</kbd></span><span>RESET CAR</span></div>
+            </div>
+          </div>
+
+          <div class="menu-footer">
+            <span>4 CIRCUITS</span>
+            <span class="footer-sep">/</span>
+            <span>3 RIVALS</span>
+            <span class="footer-sep">/</span>
+            <span>NO GRIP</span>
+            <span class="footer-sep">/</span>
+            <span>NO MERCY</span>
+          </div>
+        </div>
+
+        <section class="setup-panel" aria-label="Race setup">
+          <div class="panel-topline">
+            <div>
+              <button id="garageButton" class="panel-kicker garage-kicker" type="button">
+                <span class="garage-kicker-dot" id="garageThumb"></span>
+                YOUR RIDE // <span id="garageCarName">SUPRA MK4</span>
+                <b>TUNE ›</b>
+              </button>
+              <h2 id="setupTitle">RACE SETUP</h2>
+            </div>
+            <div class="local-badge"><span class="status-dot"></span>LOCAL</div>
+          </div>
+
+          <div class="option-section">
+            <div class="option-heading"><span>SELECT CIRCUIT</span><span id="trackCount">01 / 04</span></div>
+            <div id="trackList" class="track-list"></div>
+            <button id="testTrackButton" class="test-track-button" type="button" aria-pressed="false">
+              <span class="test-runway-icon" aria-hidden="true"></span>
+              <span class="test-track-copy">
+                <span class="test-track-label">TEST FACILITY</span>
+                <strong>OPEN AIRFIELD</strong>
+              </span>
+              <span class="test-track-badge">NO RIVALS</span>
+            </button>
+          </div>
+
+          <div class="option-row race-only" id="lapOptionsRow">
+            <span class="option-label">RACE LENGTH</span>
+            <div class="segmented" id="lapOptions" aria-label="Race length">
+              <button type="button" data-laps="2">2 LAPS</button>
+              <button type="button" data-laps="3" class="active">3 LAPS</button>
+              <button type="button" data-laps="5">5 LAPS</button>
+            </div>
+          </div>
+
+          <div class="option-row race-only" id="difficultyOptionsRow">
+            <span class="option-label">RIVAL SKILL</span>
+            <div class="segmented" id="difficultyOptions" aria-label="Rival skill">
+              <button type="button" data-difficulty="rookie">ROOKIE</button>
+              <button type="button" data-difficulty="pro" class="active">PRO</button>
+              <button type="button" data-difficulty="ace">ACE</button>
+            </div>
+          </div>
+
+          <button id="startButton" class="start-button" type="button">
+            <span class="start-label" id="startLabel">START ENGINE</span>
+            <span class="start-arrow">▶</span>
+          </button>
+
+          <div class="record-line">
+            <span id="recordLabel">TRACK RECORD</span>
+            <strong id="trackRecord">--:--.---</strong>
+          </div>
+          <p class="panel-hint" id="panelHint">TIP: THE HANDBRAKE TURNS, BUT IT DOESN'T STOP. USE IT BEFORE THE CORNER, NOT IN IT.</p>
+        </section>
+      </section>
+
+      <section id="garageScreen" class="overlay modal-overlay garage-overlay hidden" aria-label="Car garage">
+        <div class="garage-card">
+          <div class="garage-header">
+            <div>
+              <div class="modal-kicker">WORKSHOP // CAR SETUP</div>
+              <h2>TUNE YOUR RIDE</h2>
+            </div>
+            <button id="garageClose" class="garage-close" type="button" aria-label="Close garage">×</button>
+          </div>
+
+          <div class="garage-body">
+            <div class="garage-preview-panel">
+              <div class="preview-stage">
+                <canvas id="carPreview" width="560" height="270"></canvas>
+                <div class="preview-caption">TOP-DOWN // PAINT PREVIEW</div>
+              </div>
+
+              <div class="garage-current">
+                <div class="garage-current-name">
+                  <span class="garage-section-label">CURRENT BUILD</span>
+                  <strong id="garagePreviewName">SUPRA MK4</strong>
+                  <span id="garagePreviewClass">SPORTS COUPE</span>
+                </div>
+                <label class="custom-color" title="Choose a custom paint colour">
+                  CUSTOM
+                  <input id="customColor" type="color" value="#ffd447">
+                </label>
+              </div>
+
+              <div id="colorSwatches" class="color-swatches" aria-label="Paint colours"></div>
+              <div id="garageStats" class="garage-stats"></div>
+            </div>
+
+            <div class="garage-options">
+              <div class="garage-section-label">CAR TYPE</div>
+              <div id="carTypeList" class="car-type-list"></div>
+              <p id="garageBlurb" class="garage-blurb">A balanced rear-drive coupe. Happy to slide, happy to win.</p>
+              <button id="garageDone" class="modal-button primary garage-done" type="button">SAVE &amp; CLOSE <span>↵</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="pauseScreen" class="overlay modal-overlay hidden" aria-label="Game paused">
+        <div class="modal-card pause-card">
+          <div class="modal-kicker">RACE CONTROL</div>
+          <h2>PAUSED</h2>
+          <p class="modal-copy" id="pauseCopy">Engine idling. The rivals are not.</p>
+          <button id="resumeButton" class="modal-button primary" type="button">RESUME RACE</button>
+          <button id="restartButton" class="modal-button" type="button">RESTART RACE</button>
+          <button id="quitButton" class="modal-button ghost" type="button">BACK TO GARAGE</button>
+          <div class="modal-shortcuts"><kbd>ESC</kbd> RESUME <span>/</span> <kbd>M</kbd> MUTE</div>
+        </div>
+      </section>
+
+      <section id="resultsScreen" class="overlay modal-overlay results-overlay hidden" aria-label="Race results">
+        <div class="modal-card results-card">
+          <div class="results-heading">
+            <div>
+              <div class="modal-kicker" id="resultKicker">RACE COMPLETE</div>
+              <h2 id="resultTitle">FINISHED</h2>
+            </div>
+            <div class="finish-position" id="finishPosition">2<span>ND</span></div>
+          </div>
+
+          <div class="result-meta">
+            <div><span>CIRCUIT</span><strong id="resultTrack">PINE VALLEY</strong></div>
+            <div><span>RACE TIME</span><strong id="resultTime">00:00.000</strong></div>
+            <div><span>BEST LAP</span><strong id="resultBest">00:00.000</strong></div>
+          </div>
+
+          <div class="results-table">
+            <div class="results-row heading">
+              <span>POS</span><span>DRIVER</span><span>TOTAL</span><span>BEST LAP</span>
+            </div>
+            <div id="resultsRows"></div>
+          </div>
+
+          <div id="recordBanner" class="record-banner hidden">NEW TRACK RECORD</div>
+
+          <div class="results-actions">
+            <button id="raceAgainButton" class="modal-button primary" type="button">RACE AGAIN <span>↵</span></button>
+            <button id="changeTrackButton" class="modal-button" type="button">CHANGE CIRCUIT</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
