@@ -2,6 +2,10 @@
 
 A dependency-free, retro top-down racing game in HTML, CSS and JavaScript. It is inspired by the slippery, arcade feel of classic DOS racers like *Slicks 'n' Slide*, and includes a full car garage plus an open airfield for free testing.
 
+## Play online
+
+GitHub Pages: <https://jaceteus.github.io/car/>
+
 ## Start the game (Windows)
 
 Double-click **`start-game.bat`**.
@@ -17,6 +21,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\server.ps1
 ```
 
 Then open <http://127.0.0.1:8123/>.
+
+## Deploying updates
+
+GitHub Pages is configured to publish from the `main` branch.
+
+Double-click **`deploy.bat`** (or run `deploy.ps1`) to publish the current files. The script creates a commit through the GitHub API, so local Git is not required. It asks for a GitHub token with **Contents: Read and write** permission, or uses the `GITHUB_TOKEN` environment variable when present.
+
+The token is used only for that run and is never written to the repository. GitHub Pages rebuilds automatically after the commit.
 
 ## Controls
 
