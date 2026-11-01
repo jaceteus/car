@@ -45,7 +45,8 @@ The token is used only for that run and is never written to the repository. GitH
 
 ## Features
 
-- Five hand-built circuits: Pine Valley, Sunburn Strip, Dockside, Midnight Run and Sidewinder.
+- Six hand-built circuits: Pine Valley, Sunburn Strip, Dockside, Midnight Run, Sidewinder and Karelia Ring.
+- **Karelia Ring** is a Finnish forest circuit with a jump ramp on the long straight. Faster cars launch into the air and land with a puff of dust.
 - **Garage:** choose a Formula, Rally, Supra MK4 or Lamborghini, then paint it with a preset colour or your own custom colour. Each car has different speed, grip and off-road behaviour, with stat bars shown in the garage.
 - **Test Airfield:** a large open runway/apron facility with no rivals, no laps and no racing line. It includes a skid pad, parked aircraft and live telemetry for top speed, drift angle and surface.
 - Retro top-down pixel-style presentation, rendered entirely in Canvas, with distinct bodywork for every car type.

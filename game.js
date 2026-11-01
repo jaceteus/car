@@ -17,6 +17,7 @@
   const WORLD_W = 3000;
   const WORLD_H = 2000;
   const STEP = 1 / 120;
+  const JUMP_GRAVITY = 620;
   const STORE = 'rallyRush.';
   const LEGACY_STORE = 'slicksSlides.';
 
@@ -209,6 +210,26 @@
       scenery: 'desert',
       night: false,
     },
+    nordic: {
+      ground: '#244237',
+      groundDark: '#1a332a',
+      groundLight: '#305346',
+      groundDetail: '#58765e',
+      runoff: '#6a6950',
+      runoffDark: '#55543f',
+      asphalt: '#3b4243',
+      asphaltDark: '#323839',
+      asphaltLight: '#4c5454',
+      curbA: '#ece9d8',
+      curbB: '#c94a3c',
+      line: '#e3e7d8',
+      accent: '#ffd447',
+      skid: 'rgba(8, 14, 12, 0.18)',
+      dust: '#ad9d72',
+      smoke: 'rgba(220, 229, 216, 0.30)',
+      scenery: 'nordic',
+      night: false,
+    },
   };
 
   /* -------------------------------------------------------------------
@@ -296,6 +317,26 @@
         [1715, 589], [1686, 846], [1834, 1031], [2076, 1073], [2080, 836],
         [2116, 591], [2375, 602], [2391, 849], [2399, 1108], [2373, 1365],
         [2326, 1619],
+      ],
+    },
+    {
+      id: 'karelia',
+      name: 'KARELIA RING',
+      location: 'FINNISH FOREST',
+      distance: '5.5 KM',
+      difficulty: 2,
+      theme: 'nordic',
+      width: 170,
+      seed: 5531,
+      jumps: [{ at: 0.355 }],
+      points: [
+        [2030, 351], [2307, 381], [2555, 493], [2525, 709], [2264, 780],
+        [2060, 923], [2167, 1163], [2363, 1349], [2249, 1592], [1979, 1564],
+        [1739, 1424], [1528, 1240], [1309, 1065], [1110, 866], [850, 835],
+        [976, 1032], [1158, 1233], [1138, 1512], [933, 1666], [690, 1541],
+        [511, 1325], [446, 1056], [496, 783], [684, 578], [926, 452],
+        [1208, 455], [1424, 630], [1603, 845], [1842, 828], [1725, 590],
+        [1503, 428], [1751, 335],
       ],
     },
   ];
@@ -670,6 +711,57 @@
     strokeOffsetTrack(g, points, -width * 0.5 + 8, 3, 'rgba(240, 240, 223, 0.78)');
 
     drawStartLine(track, g);
+    drawJumpRamps(track, g);
+  }
+
+  function drawJumpRamps(track, g) {
+    if (!track.jumps || !track.jumps.length) return;
+    const width = track.geometry.width;
+    const half = width * 0.43;
+    const ramp = 150;
+    for (const jump of track.jumps) {
+      g.save();
+      g.translate(jump.x, jump.y);
+      g.rotate(Math.atan2(jump.ty, jump.tx));
+
+      g.fillStyle = 'rgba(14, 18, 17, 0.28)';
+      g.fillRect(-ramp, -half, ramp, half * 2);
+      g.fillStyle = 'rgba(255, 212, 71, 0.09)';
+      g.fillRect(-ramp, -half, ramp, half * 2);
+
+      g.strokeStyle = 'rgba(255, 212, 71, 0.8)';
+      g.lineWidth = 7;
+      g.lineCap = 'round';
+      g.lineJoin = 'round';
+      for (let i = 0; i < 3; i++) {
+        const x = -ramp + 30 + i * 40;
+        g.beginPath();
+        g.moveTo(x, -half + 9);
+        g.lineTo(x + 22, 0);
+        g.lineTo(x, half - 9);
+        g.stroke();
+      }
+
+      g.strokeStyle = 'rgba(244, 236, 217, 0.52)';
+      g.lineWidth = 3;
+      g.beginPath();
+      g.moveTo(-ramp, -half);
+      g.lineTo(0, -half);
+      g.moveTo(-ramp, half);
+      g.lineTo(0, half);
+      g.stroke();
+
+      g.fillStyle = 'rgba(9, 13, 14, 0.62)';
+      g.fillRect(-9, -half, 9, half * 2);
+      g.fillStyle = '#ffd447';
+      g.fillRect(-18, -half, 8, half * 2);
+
+      g.font = '700 11px Consolas, monospace';
+      g.textAlign = 'center';
+      g.fillStyle = 'rgba(255, 212, 71, 0.82)';
+      g.fillText('JUMP', -ramp * 0.5, half + 20);
+      g.restore();
+    }
   }
 
   function drawStartLine(track, g) {
@@ -771,6 +863,12 @@
       place(125, 44, (x, y, r) => ({ type: 'tree', x, y, s: 0.8 + r() * 0.8, rot: r() * TAU }));
       place(88, 20, (x, y, r) => ({ type: 'bush', x, y, s: 0.7 + r() * 0.8, rot: r() * TAU }));
       place(30, 18, (x, y, r) => ({ type: 'stump', x, y, s: 0.8 + r() * 0.7, rot: r() * TAU }));
+    } else if (theme.scenery === 'nordic') {
+      place(96, 46, (x, y, r) => ({ type: 'tree', x, y, s: 0.75 + r() * 0.75, rot: r() * TAU }));
+      place(62, 30, (x, y, r) => ({ type: 'birch', x, y, s: 0.8 + r() * 0.65, rot: r() * TAU }));
+      place(74, 20, (x, y, r) => ({ type: 'bush', x, y, s: 0.7 + r() * 0.7, rot: r() * TAU }));
+      place(30, 19, (x, y, r) => ({ type: 'stump', x, y, s: 0.8 + r() * 0.7, rot: r() * TAU }));
+      place(30, 30, (x, y, r) => ({ type: 'rock', x, y, s: 0.6 + r() * 0.7, rot: r() * TAU }));
     } else if (theme.scenery === 'desert') {
       place(100, 32, (x, y, r) => ({ type: 'rock', x, y, s: 0.7 + r() * 1.15, rot: r() * TAU }));
       place(50, 25, (x, y, r) => ({ type: 'cactus', x, y, s: 0.75 + r() * 0.55, rot: 0 }));
@@ -840,8 +938,32 @@
         g.beginPath();
         g.arc(-9, -22, 7, 0, TAU);
         g.fill();
-      } else if (item.type === 'bush') {
-        g.fillStyle = 'rgba(0, 0, 0, 0.18)';
+      } else if (item.type === 'birch') {
+        g.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        g.beginPath();
+        g.ellipse(8, 11, 19, 9, 0, 0, TAU);
+        g.fill();
+        g.fillStyle = '#e6e2d2';
+        g.fillRect(-3, -2, 6, 17);
+        g.fillStyle = '#2b2b26';
+        g.fillRect(-3, 2, 6, 2);
+        g.fillRect(-3, 8, 6, 2);
+        g.fillStyle = '#4f7a45';
+        g.beginPath();
+        g.arc(-12, -10, 15, 0, TAU);
+        g.arc(12, -11, 16, 0, TAU);
+        g.arc(0, -23, 18, 0, TAU);
+        g.fill();
+        g.fillStyle = 'rgba(155, 190, 110, 0.55)';
+        g.beginPath();
+        g.arc(-7, -23, 9, 0, TAU);
+        g.arc(10, -17, 7, 0, TAU);
+        g.fill();
+        g.fillStyle = 'rgba(232, 236, 210, 0.28)';
+        g.beginPath();
+        g.arc(-2, -29, 5, 0, TAU);
+        g.fill();
+      } else if (item.type === 'bush') {        g.fillStyle = 'rgba(0, 0, 0, 0.18)';
         g.beginPath();
         g.ellipse(3, 5, 15, 8, 0, 0, TAU);
         g.fill();
@@ -1090,7 +1212,14 @@
       skidCtx: null,
       map: null,
       decor: [],
+      jumps: [],
     };
+
+    track.jumps = (def.jumps || []).map((jumpDef) => {
+      const index = mod(Math.round(jumpDef.at * geom.n), geom.n);
+      const p = geom.points[index];
+      return { index, x: p.x, y: p.y, tx: p.tx, ty: p.ty, nx: p.nx, ny: p.ny };
+    });
 
     drawGround(track, g, rng);
     drawTrackSurface(track, g, rng);
@@ -2176,6 +2305,9 @@
       edgeDistance: 0,
       surface: 'road',
       offRoad: false,
+      z: 0,
+      vz: 0,
+      airborne: false,
       lapsDone: 0,
       lapStart: 0,
       lapTimes: [],
@@ -2490,6 +2622,12 @@
   }
 
   function updateCarPhysics(car, dt) {
+    if (car.airborne) {
+      updateAirborneCar(car, dt);
+      return;
+    }
+    const previousX = car.x;
+    const previousY = car.y;
     const cos = Math.cos(car.angle);
     const sin = Math.sin(car.angle);
     let forward = car.vx * cos + car.vy * sin;
@@ -2548,10 +2686,81 @@
     car.lateralSpeed = lateral;
     car.drifting = onRoad && Math.abs(lateral) > 56 && car.speed > 78;
     if (car.control.handbrake && car.speed > 60) car.drifting = true;
+
+    checkJump(car, previousX, previousY);
+  }
+
+  function updateAirborneCar(car, dt) {
+    car.vx *= Math.exp(-0.06 * dt);
+    car.vy *= Math.exp(-0.06 * dt);
+    car.x += car.vx * dt;
+    car.y += car.vy * dt;
+    car.z += car.vz * dt;
+    car.vz -= JUMP_GRAVITY * dt;
+
+    const cos = Math.cos(car.angle);
+    const sin = Math.sin(car.angle);
+    car.speed = Math.hypot(car.vx, car.vy);
+    car.forwardSpeed = car.vx * cos + car.vy * sin;
+    car.lateralSpeed = -car.vx * sin + car.vy * cos;
+    car.drifting = false;
+
+    if (car.z <= 0) landCar(car);
+  }
+
+  function checkJump(car, previousX, previousY) {
+    if (car.airborne || !currentTrack || !currentTrack.jumps) return;
+    const geom = currentTrack.geometry;
+    for (const jump of currentTrack.jumps) {
+      const before = (previousX - jump.x) * jump.tx + (previousY - jump.y) * jump.ty;
+      const after = (car.x - jump.x) * jump.tx + (car.y - jump.y) * jump.ty;
+      if (before >= 0 || after < 0) continue;
+      const lateral = Math.abs((car.x - jump.x) * jump.nx + (car.y - jump.y) * jump.ny);
+      const along = car.vx * jump.tx + car.vy * jump.ty;
+      if (lateral > geom.width * 0.46 || along < 150) continue;
+
+      car.airborne = true;
+      car.z = 0.01;
+      car.vz = clamp(along * 0.82, 95, 300);
+      car.skid.active = false;
+      car.skid.prevL = car.skid.prevR = null;
+      if (car.isPlayer) camera.shake = Math.max(camera.shake, 3.5);
+      break;
+    }
+  }
+
+  function landCar(car) {
+    car.z = 0;
+    car.vz = 0;
+    car.airborne = false;
+    car.vx *= 0.955;
+    car.vy *= 0.955;
+    car.skid.active = false;
+    car.skid.prevL = car.skid.prevR = null;
+    car.dustTimer = 0;
+
+    const cos = Math.cos(car.angle);
+    const sin = Math.sin(car.angle);
+    for (let i = 0; i < 7; i++) {
+      const side = (Math.random() - 0.5) * 26;
+      spawnParticle(
+        car.x + cos * (Math.random() * 18 - 6) - sin * side,
+        car.y + sin * (Math.random() * 18 - 6) + cos * side,
+        -car.vx * 0.12 + (Math.random() - 0.5) * 36,
+        -car.vy * 0.12 + (Math.random() - 0.5) * 36,
+        {
+          life: 0.35 + Math.random() * 0.35,
+          size: 3 + Math.random() * 6,
+          grow: 20,
+          color: currentTrack ? currentTrack.theme.dust : 'rgba(190,180,150,0.5)',
+        }
+      );
+    }
+    if (car.isPlayer) camera.shake = Math.max(camera.shake, 5);
   }
 
   function addSkidMarks(car, dt) {
-    if (!car.drifting || car.surface === 'grass') {
+    if (car.airborne || !car.drifting || car.surface === 'grass') {
       car.skid.active = false;
       car.skid.prevL = car.skid.prevR = null;
       return;
@@ -2606,6 +2815,7 @@
   }
 
   function spawnCarEffects(car, dt) {
+    if (car.airborne) return;
     if (car.surface === 'grass' && car.speed > 75) {
       car.dustTimer += dt;
       if (car.dustTimer > 0.035) {
@@ -2678,7 +2888,7 @@
       for (let j = i + 1; j < list.length; j++) {
         const a = list[i];
         const b = list[j];
-        if (a.ghost || b.ghost) continue;
+        if (a.ghost || b.ghost || a.airborne || b.airborne) continue;
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const dist = Math.hypot(dx, dy);
@@ -2832,6 +3042,9 @@
     car.vx = 0;
     car.vy = 0;
     car.steer = 0;
+    car.z = 0;
+    car.vz = 0;
+    car.airborne = false;
     car.skid.active = false;
     showToast('CAR RESET');
     sound.beep('count');
@@ -2850,7 +3063,7 @@
     const p = race.player;
     const speedRatio = clamp(p.speed / p.maxSpeed, 0, 1);
     const targetX = p.x + p.vx * 0.24 + Math.cos(p.angle) * 32;
-    const targetY = p.y + p.vy * 0.24 + Math.sin(p.angle) * 32;
+    const targetY = p.y + p.vy * 0.24 + Math.sin(p.angle) * 32 - p.z * 0.35;
     const targetZoom = (race.mode === 'test' ? 0.91 : 0.985) - speedRatio * 0.12;
 
     camera.x = expo(camera.x, targetX, 4.2, dt);
@@ -2966,7 +3179,10 @@
     return { frontX: 14, rearX: -15, y: 11.5, length: 10, width: 5.2, skidY: 10 };
   }
 
+  let carShadowEnabled = true;
+
   function drawCarShadow(g, length, width) {
+    if (!carShadowEnabled) return;
     g.save();
     g.translate(5, 7);
     g.fillStyle = 'rgba(0, 0, 0, 0.33)';
@@ -3341,11 +3557,30 @@
   }
 
   function drawCar(car, alpha = 1) {
+    const height = car.z || 0;
+    if (height > 0) {
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle);
+      ctx.globalAlpha = alpha * clamp(1 - height / 260, 0.16, 0.52);
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(5, 7, 31, 17, 0, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+    }
+
     ctx.save();
-    ctx.translate(car.x, car.y);
+    ctx.translate(car.x, car.y - height * 0.9);
     ctx.rotate(car.angle);
+    if (height > 0) {
+      const scale = 1 + height * 0.0016;
+      ctx.scale(scale, scale);
+    }
     ctx.globalAlpha = alpha;
+    carShadowEnabled = height <= 0;
     drawCarBody(ctx, car);
+    carShadowEnabled = true;
 
     if (car.isPlayer) {
       ctx.fillStyle = '#f8f3e2';
