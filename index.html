@@ -7,13 +7,18 @@
   <meta name="description" content="Rally Rush - a retro top-down arcade racing game with a four-car garage, custom paint, AI rivals and an open airfield test facility.">
   <title>Rally Rush - Retro Top-Down Racing</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230d1114'/%3E%3Cpath d='M11 38h42l-6 13H17z' fill='%23ffd447'/%3E%3Cpath d='M19 23h26l7 17H12z' fill='%23f0523d'/%3E%3Ccircle cx='21' cy='45' r='6' fill='%230d1114'/%3E%3Ccircle cx='43' cy='45' r='6' fill='%230d1114'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <main id="app">
     <div id="game-shell" class="game-shell">
       <canvas id="game" width="1280" height="720" aria-label="Rally Rush racing game"></canvas>
       <div class="screen-fx" aria-hidden="true"></div>
+
+      <button id="fullscreenButton" class="fullscreen-button" type="button" aria-label="Enter fullscreen" aria-pressed="false" title="Toggle fullscreen (F)">
+        <svg class="icon-expand" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>
+        <svg class="icon-compress" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h5V4M20 9h-5V4M4 15h5v5M20 15h-5v5"/></svg>
+      </button>
 
       <div id="touchControls" class="touch-controls hidden" aria-label="Touch driving controls">
         <button id="touchPause" class="touch-btn touch-pause" type="button" aria-label="Pause game" title="Pause">
@@ -75,6 +80,7 @@
               <div class="control-item"><span class="keys"><kbd class="wide">SPACE</kbd></span><span>HANDBRAKE</span></div>
               <div class="control-item"><span class="keys"><kbd>ESC</kbd></span><span>PAUSE</span></div>
               <div class="control-item"><span class="keys"><kbd>R</kbd></span><span>RESET CAR</span></div>
+              <div class="control-item"><span class="keys"><kbd>F</kbd></span><span>FULL SCREEN</span></div>
               <div class="control-item touch-only"><span class="keys"><kbd class="wide">TOUCH</kbd></span><span>SCREEN CONTROLS</span></div>
             </div>
           </div>
@@ -198,7 +204,7 @@
           <button id="resumeButton" class="modal-button primary" type="button">RESUME RACE</button>
           <button id="restartButton" class="modal-button" type="button">RESTART RACE</button>
           <button id="quitButton" class="modal-button ghost" type="button">BACK TO GARAGE</button>
-          <div class="modal-shortcuts"><kbd>ESC</kbd> RESUME <span>/</span> <kbd>M</kbd> MUTE</div>
+          <div class="modal-shortcuts"><kbd>ESC</kbd> RESUME <span>/</span> <kbd>M</kbd> MUTE <span>/</span> <kbd>F</kbd> FULLSCREEN</div>
         </div>
       </section>
 
@@ -238,6 +244,6 @@
     </div>
   </main>
 
-  <script src="game.js?v=2"></script>
+  <script src="game.js?v=3"></script>
 </body>
 </html>

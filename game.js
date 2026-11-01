@@ -2101,6 +2101,7 @@
   function openGarage() {
     if (state !== 'menu' || garageOpen) return;
     garageOpen = true;
+    document.body.classList.add('garage-open');
     garageScreen.classList.remove('hidden');
     syncCarUI();
     refreshGarage();
@@ -2109,6 +2110,7 @@
   function closeGarage() {
     if (!garageOpen) return;
     garageOpen = false;
+    document.body.classList.remove('garage-open');
     garageScreen.classList.add('hidden');
   }
 
@@ -4246,7 +4248,7 @@
 
   const handledKeys = new Set([
     'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space',
-    'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyR', 'KeyM', 'Escape', 'Enter',
+    'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyR', 'KeyF', 'KeyM', 'Escape', 'Enter',
   ]);
 
   const touchControlsEl = $('touchControls');
@@ -4279,6 +4281,7 @@
     const show = state === 'racing' || state === 'countdown' || state === 'test';
     if (show === touchUiVisible) return;
     touchUiVisible = show;
+    document.body.classList.toggle('touch-race', show);
     touchControlsEl.classList.toggle('hidden', !show);
     if (!show) clearTouchInput();
   }
@@ -4366,6 +4369,68 @@
     });
   }
 
+  /* -------------------------------------------------------------------
+     Fullscreen
+     ------------------------------------------------------------------- */
+
+  const fullscreenButton = $('fullscreenButton');
+  const canFullscreen = !!(
+    document.documentElement.requestFullscreen
+    || document.documentElement.webkitRequestFullscreen
+    || document.documentElement.msRequestFullscreen
+  );
+
+  function getFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+  }
+
+  function syncFullscreenButton() {
+    const active = !!getFullscreenElement();
+    fullscreenButton.classList.toggle('is-fullscreen', active);
+    fullscreenButton.setAttribute('aria-pressed', active ? 'true' : 'false');
+    fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
+  }
+
+  function toggleFullscreen() {
+    if (getFullscreenElement()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+      if (!exit) return;
+      try {
+        const result = exit.call(document);
+        if (result && typeof result.catch === 'function') result.catch(() => {});
+      } catch (error) {
+        /* The browser reports its own fullscreen errors. */
+      }
+      return;
+    }
+
+    const target = document.documentElement;
+    const request = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
+    if (!request) {
+      showToast('FULLSCREEN NOT SUPPORTED', 1400);
+      return;
+    }
+
+    try {
+      const result = request.call(target);
+      if (result && typeof result.catch === 'function') {
+        result.catch(() => showToast('FULLSCREEN BLOCKED', 1400));
+      }
+    } catch (error) {
+      showToast('FULLSCREEN BLOCKED', 1400);
+    }
+  }
+
+  if (canFullscreen) {
+    fullscreenButton.addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', syncFullscreenButton);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenButton);
+    document.addEventListener('msfullscreenchange', syncFullscreenButton);
+    syncFullscreenButton();
+  } else {
+    fullscreenButton.classList.add('hidden');
+  }
+
   window.addEventListener('keydown', (event) => {
     if (handledKeys.has(event.code)) {
       if (state !== 'menu' || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(event.code)) {
@@ -4380,6 +4445,11 @@
         event.preventDefault();
         closeGarage();
       }
+      return;
+    }
+
+    if (event.code === 'KeyF') {
+      toggleFullscreen();
       return;
     }
 

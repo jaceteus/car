@@ -40,6 +40,7 @@ The token is used only for that run and is never written to the repository. GitH
 | Handbrake | `Space` |
 | Reset car / return to spawn | `R` |
 | Pause | `Esc` |
+| Fullscreen | `F` / top-right button |
 | Mute | `M` |
 | Confirm / race again | `Enter` |
 
