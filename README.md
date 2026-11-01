@@ -1,4 +1,4 @@
-# Slicks & Slides
+# Rally Rush
 
 A dependency-free, retro top-down racing game in HTML, CSS and JavaScript. It is inspired by the slippery, arcade feel of classic DOS racers like *Slicks 'n' Slide*, and includes a full car garage plus an open airfield for free testing.
 
@@ -45,7 +45,7 @@ The token is used only for that run and is never written to the repository. GitH
 
 ## Features
 
-- Four hand-built circuits: Pine Valley, Sunburn Strip, Dockside and Midnight Run.
+- Five hand-built circuits: Pine Valley, Sunburn Strip, Dockside, Midnight Run and Sidewinder.
 - **Garage:** choose a Formula, Rally, Supra MK4 or Lamborghini, then paint it with a preset colour or your own custom colour. Each car has different speed, grip and off-road behaviour, with stat bars shown in the garage.
 - **Test Airfield:** a large open runway/apron facility with no rivals, no laps and no racing line. It includes a skid pad, parked aircraft and live telemetry for top speed, drift angle and surface.
 - Retro top-down pixel-style presentation, rendered entirely in Canvas, with distinct bodywork for every car type.

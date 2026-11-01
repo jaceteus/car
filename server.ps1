@@ -28,7 +28,7 @@ $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://127.0.0.1:$Port/")
 $listener.Start()
 
-Write-Host "Slicks & Slides local server"
+Write-Host "Rally Rush local server"
 Write-Host "Serving: $root"
 Write-Host "Address: http://127.0.0.1:$Port/"
 Write-Host "Close this window to stop the server."

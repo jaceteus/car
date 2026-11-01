@@ -1,5 +1,5 @@
 /* =====================================================================
-   SLICKS & SLIDES
+   RALLY RUSH
    A dependency-free retro top-down racer, built for the browser.
    ===================================================================== */
 
@@ -17,7 +17,8 @@
   const WORLD_W = 3000;
   const WORLD_H = 2000;
   const STEP = 1 / 120;
-  const STORE = 'slicksSlides.';
+  const STORE = 'rallyRush.';
+  const LEGACY_STORE = 'slicksSlides.';
 
   const TAU = Math.PI * 2;
   const clamp = (v, min, max) => (v < min ? min : v > max ? max : v);
@@ -58,7 +59,14 @@
   function readStore(key, fallback) {
     try {
       const value = localStorage.getItem(STORE + key);
-      return value === null ? fallback : value;
+      if (value !== null) return value;
+      /* Carry over settings and records saved before the rename. */
+      const legacy = localStorage.getItem(LEGACY_STORE + key);
+      if (legacy !== null) {
+        localStorage.setItem(STORE + key, legacy);
+        return legacy;
+      }
+      return fallback;
     } catch (err) {
       return fallback;
     }
@@ -181,6 +189,26 @@
       scenery: 'midnight',
       night: true,
     },
+    canyon: {
+      ground: '#7a4636',
+      groundDark: '#65382b',
+      groundLight: '#8e5743',
+      groundDetail: '#a66c55',
+      runoff: '#b08a67',
+      runoffDark: '#947153',
+      asphalt: '#46413d',
+      asphaltDark: '#3b3733',
+      asphaltLight: '#57514a',
+      curbA: '#f2e5c9',
+      curbB: '#d3543a',
+      line: '#ecdec0',
+      accent: '#ffd447',
+      skid: 'rgba(22, 14, 10, 0.18)',
+      dust: '#d0a578',
+      smoke: 'rgba(240, 226, 202, 0.30)',
+      scenery: 'desert',
+      night: false,
+    },
   };
 
   /* -------------------------------------------------------------------
@@ -248,6 +276,26 @@
         [2560, 700], [2500, 1080], [2240, 1210], [2360, 1520], [2000, 1660],
         [1670, 1500], [1440, 1670], [1080, 1690], [780, 1490], [500, 1200],
         [500, 780],
+      ],
+    },
+    {
+      id: 'sidewinder',
+      name: 'SIDEWINDER',
+      location: 'CANYON CIRCUIT',
+      distance: '5.6 KM',
+      difficulty: 3,
+      theme: 'canyon',
+      width: 176,
+      seed: 6187,
+      points: [
+        [2122, 1731], [1875, 1656], [1654, 1521], [1480, 1335], [1300, 1150],
+        [1031, 1092], [899, 1248], [1116, 1387], [1325, 1485], [1432, 1661],
+        [1187, 1658], [947, 1563], [737, 1414], [571, 1237], [656, 995],
+        [838, 868], [1003, 732], [831, 557], [612, 439], [731, 264],
+        [966, 203], [1105, 390], [1341, 484], [1481, 277], [1697, 331],
+        [1715, 589], [1686, 846], [1834, 1031], [2076, 1073], [2080, 836],
+        [2116, 591], [2375, 602], [2391, 849], [2399, 1108], [2373, 1365],
+        [2326, 1619],
       ],
     },
   ];

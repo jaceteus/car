@@ -24,7 +24,7 @@ $Files = @(
 )
 
 if ([string]::IsNullOrWhiteSpace($Message)) {
-    $Message = 'Deploy Slicks & Slides ({0})' -f (Get-Date -Format 'yyyy-MM-dd HH:mm')
+    $Message = 'Deploy Rally Rush ({0})' -f (Get-Date -Format 'yyyy-MM-dd HH:mm')
 }
 
 $token = $env:GITHUB_TOKEN
@@ -45,7 +45,7 @@ if ([string]::IsNullOrWhiteSpace($token)) {
 $headers = @{
     Authorization          = "Bearer $token"
     Accept                 = 'application/vnd.github+json'
-    'User-Agent'           = 'slicks-and-slides-deploy'
+    'User-Agent'           = 'rally-rush-deploy'
     'X-GitHub-Api-Version' = '2022-11-28'
 }
 
@@ -73,7 +73,7 @@ function Invoke-GitHubApi {
 
 try {
     Write-Host ''
-    Write-Host '  SLICKS & SLIDES - GitHub Pages deploy' -ForegroundColor Yellow
+    Write-Host '  RALLY RUSH - GitHub Pages deploy' -ForegroundColor Yellow
     Write-Host "  $RepoUrl"
     Write-Host ''
 
