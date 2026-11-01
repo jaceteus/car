@@ -1909,6 +1909,21 @@
     handbrake: false,
   };
 
+  const touchInput = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+    handbrake: false,
+  };
+
+  const touchQuery = new URLSearchParams(window.location.search).get('touch');
+  const touchEnabled = touchQuery === '1'
+    || (touchQuery !== '0' && (
+      (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+      || (navigator.maxTouchPoints > 0 && window.innerWidth <= 1100)
+    ));
+
   /* -------------------------------------------------------------------
      Setup / menu UI
      ------------------------------------------------------------------- */
@@ -2426,7 +2441,7 @@
     race.countdown = 3;
     race.lastCountdown = 4;
     accumulator = 0;
-    keys.up = keys.down = keys.left = keys.right = keys.handbrake = false;
+    clearDrivingInput();
 
     const targetZoom = 0.98;
     camera.zoom = targetZoom;
@@ -2481,7 +2496,7 @@
     };
     state = 'test';
     accumulator = 0;
-    keys.up = keys.down = keys.left = keys.right = keys.handbrake = false;
+    clearDrivingInput();
 
     camera.zoom = 0.95;
     camera.x = player.x + Math.cos(player.angle) * 100;
@@ -2518,10 +2533,10 @@
   function playerInput() {
     const p = race.player;
     if (!p) return;
-    p.control.throttle = keys.up;
-    p.control.brake = keys.down;
-    p.control.steer = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-    p.control.handbrake = keys.handbrake;
+    p.control.throttle = keys.up || touchInput.up;
+    p.control.brake = keys.down || touchInput.down;
+    p.control.steer = ((keys.right || touchInput.right) ? 1 : 0) - ((keys.left || touchInput.left) ? 1 : 0);
+    p.control.handbrake = keys.handbrake || touchInput.handbrake;
   }
 
   function aiInput(car) {
@@ -3821,32 +3836,34 @@
 
     drawSpeedPanel(p);
 
-    const panelX = W - 24 - 260;
-    const panelY = H - 24 - 165;
-    drawPanel(panelX, panelY, 260, 165, 'rgba(101, 215, 232, 0.7)');
-    ctx.fillStyle = 'rgba(199, 207, 199, 0.7)';
-    ctx.font = '700 8px Consolas, monospace';
-    ctx.fillText('TEST DATA', panelX + 16, panelY + 23);
+    if (!touchUiVisible) {
+      const panelX = W - 24 - 260;
+      const panelY = H - 24 - 165;
+      drawPanel(panelX, panelY, 260, 165, 'rgba(101, 215, 232, 0.7)');
+      ctx.fillStyle = 'rgba(199, 207, 199, 0.7)';
+      ctx.font = '700 8px Consolas, monospace';
+      ctx.fillText('TEST DATA', panelX + 16, panelY + 23);
 
-    const rows = [
-      ['TOP SPEED', `${String(race.topSpeed || 0).padStart(3, '0')} KM/H`],
-      ['DRIFT ANGLE', `${String(drift).padStart(2, '0')}°`],
-      ['SURFACE', surface],
-      ['CAR TYPE', spec.name],
-    ];
-    rows.forEach(([label, value], index) => {
-      const y = panelY + 47 + index * 27;
-      ctx.fillStyle = index === 3 ? 'rgba(116, 130, 123, 0.9)' : 'rgba(210, 215, 205, 0.7)';
-      ctx.font = '700 7px Consolas, monospace';
-      ctx.fillText(label, panelX + 16, y);
-      ctx.fillStyle = index === 2 && p.surface === 'grass' ? '#d8b96d' : '#f4ecd9';
-      ctx.font = '700 11px Consolas, monospace';
-      ctx.textAlign = 'right';
-      ctx.fillText(value, panelX + 244, y);
-      ctx.textAlign = 'left';
-    });
+      const rows = [
+        ['TOP SPEED', `${String(race.topSpeed || 0).padStart(3, '0')} KM/H`],
+        ['DRIFT ANGLE', `${String(drift).padStart(2, '0')}°`],
+        ['SURFACE', surface],
+        ['CAR TYPE', spec.name],
+      ];
+      rows.forEach(([label, value], index) => {
+        const y = panelY + 47 + index * 27;
+        ctx.fillStyle = index === 3 ? 'rgba(116, 130, 123, 0.9)' : 'rgba(210, 215, 205, 0.7)';
+        ctx.font = '700 7px Consolas, monospace';
+        ctx.fillText(label, panelX + 16, y);
+        ctx.fillStyle = index === 2 && p.surface === 'grass' ? '#d8b96d' : '#f4ecd9';
+        ctx.font = '700 11px Consolas, monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(value, panelX + 244, y);
+        ctx.textAlign = 'left';
+      });
+    }
 
-    if (race.time < 12) {
+    if (!touchUiVisible && race.time < 12) {
       ctx.textAlign = 'center';
       ctx.globalAlpha = clamp((12 - race.time) / 2.2, 0, 1);
       ctx.fillStyle = 'rgba(8, 13, 15, 0.72)';
@@ -3916,10 +3933,10 @@
     ctx.fillText(`${DIFFICULTIES[difficultyKey].label} RIVALS // ${race.totalLaps} LAPS`, W - 24 - 232, 91);
 
     drawSpeedPanel(p);
-    drawMiniMap();
+    if (!touchUiVisible) drawMiniMap();
 
     // Controls hint.
-    if (race.time < 10 && state === 'racing') {
+    if (!touchUiVisible && race.time < 10 && state === 'racing') {
       ctx.textAlign = 'center';
       ctx.globalAlpha = clamp((10 - race.time) / 2.2, 0, 1);
       ctx.fillStyle = 'rgba(8, 13, 15, 0.72)';
@@ -4217,6 +4234,8 @@
     }
 
     updateAudio();
+    updateRotateHint();
+    updateTouchUI();
     render(now / 1000);
     requestAnimationFrame(frame);
   }
@@ -4229,6 +4248,123 @@
     'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space',
     'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyR', 'KeyM', 'Escape', 'Enter',
   ]);
+
+  const touchControlsEl = $('touchControls');
+  const rotateHintEl = $('rotateHint');
+  let touchUiVisible = false;
+  let rotateHintShown = false;
+  let rotatePaused = false;
+  let rotateDismissed = false;
+
+  function clearTouchInput() {
+    touchInput.up = false;
+    touchInput.down = false;
+    touchInput.left = false;
+    touchInput.right = false;
+    touchInput.handbrake = false;
+    if (touchControlsEl) {
+      touchControlsEl.querySelectorAll('.touch-btn.pressed').forEach((button) => {
+        button.classList.remove('pressed');
+      });
+    }
+  }
+
+  function clearDrivingInput() {
+    keys.up = keys.down = keys.left = keys.right = keys.handbrake = false;
+    clearTouchInput();
+  }
+
+  function updateTouchUI() {
+    if (!touchEnabled) return;
+    const show = state === 'racing' || state === 'countdown' || state === 'test';
+    if (show === touchUiVisible) return;
+    touchUiVisible = show;
+    touchControlsEl.classList.toggle('hidden', !show);
+    if (!show) clearTouchInput();
+  }
+
+  function updateRotateHint() {
+    if (!touchEnabled) return;
+    const portrait = window.innerHeight > window.innerWidth;
+    const inRace = state === 'racing' || state === 'countdown' || state === 'test';
+    if (portrait && !rotateDismissed && (inRace || rotateHintShown)) {
+      if (!rotateHintShown) {
+        rotateHintShown = true;
+        rotatePaused = true;
+        rotateHintEl.classList.remove('hidden');
+        pauseRace();
+      }
+      return;
+    }
+    if (!rotateHintShown) return;
+    rotateHintShown = false;
+    rotateHintEl.classList.add('hidden');
+    if (rotatePaused) {
+      rotatePaused = false;
+      if (state === 'paused') resumeRace();
+    }
+  }
+
+  function bindTouchHold(button) {
+    const action = button.dataset.touchHold;
+    if (!action) return;
+    let activePointer = null;
+
+    button.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      event.preventDefault();
+      activePointer = event.pointerId;
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch (error) {
+        /* Pointer capture is best-effort. */
+      }
+      touchInput[action] = true;
+      button.classList.add('pressed');
+    });
+
+    function release(event) {
+      if (activePointer !== null && event.pointerId !== activePointer) return;
+      activePointer = null;
+      touchInput[action] = false;
+      button.classList.remove('pressed');
+    }
+
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointercancel', release);
+    button.addEventListener('lostpointercapture', release);
+    button.addEventListener('contextmenu', (event) => event.preventDefault());
+  }
+
+  function bindTouchAction(button, action) {
+    if (!button) return;
+    button.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      event.preventDefault();
+      button.classList.add('pressed');
+      action();
+    });
+    ['pointerup', 'pointercancel', 'pointerleave', 'lostpointercapture'].forEach((type) => {
+      button.addEventListener(type, () => button.classList.remove('pressed'));
+    });
+    button.addEventListener('contextmenu', (event) => event.preventDefault());
+  }
+
+  if (touchEnabled) {
+    document.body.classList.add('touch-ui');
+    touchControlsEl.querySelectorAll('[data-touch-hold]').forEach(bindTouchHold);
+    bindTouchAction($('touchReset'), resetPlayerCar);
+    bindTouchAction($('touchPause'), pauseRace);
+    $('rotateDismiss').addEventListener('click', () => {
+      rotateDismissed = true;
+      rotateHintShown = false;
+      rotateHintEl.classList.add('hidden');
+      if (rotatePaused) {
+        rotatePaused = false;
+        if (state === 'paused') resumeRace();
+      }
+    });
+  }
 
   window.addEventListener('keydown', (event) => {
     if (handledKeys.has(event.code)) {
@@ -4296,7 +4432,7 @@
   });
 
   window.addEventListener('blur', () => {
-    keys.up = keys.down = keys.left = keys.right = keys.handbrake = false;
+    clearDrivingInput();
   });
 
   document.addEventListener('visibilitychange', () => {

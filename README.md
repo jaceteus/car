@@ -43,6 +43,8 @@ The token is used only for that run and is never written to the repository. GitH
 | Mute | `M` |
 | Confirm / race again | `Enter` |
 
+On phones and tablets, an on-screen control pad appears during the race: steer with the two arrow buttons, use the up/down pedals for throttle and brake, and tap **HB** for the handbrake or the circular arrow to reset the car. The pause button sits in the top-left corner. A `?touch=1` URL parameter forces the touch pad on (useful for testing on a desktop), and `?touch=0` hides it.
+
 ## Features
 
 - Six hand-built circuits: Pine Valley, Sunburn Strip, Dockside, Midnight Run, Sidewinder and Karelia Ring.
@@ -51,6 +53,7 @@ The token is used only for that run and is never written to the repository. GitH
 - **Test Airfield:** a large open runway/apron facility with no rivals, no laps and no racing line. It includes a skid pad, parked aircraft and live telemetry for top speed, drift angle and surface.
 - Retro top-down pixel-style presentation, rendered entirely in Canvas, with distinct bodywork for every car type.
 - Slippery drift handling with a handbrake, tyre marks, dust and collision sparks.
+- Touch controls for phones and tablets: steering arrows, throttle/brake pedals, handbrake, reset and pause buttons.
 - Three AI rivals with selectable Rookie, Pro and Ace skill levels.
 - Two-, three- or five-lap races, lap timing, live standings and persistent track records.
 - Procedural engine audio, tyre squeal and race beeps using the Web Audio API.
@@ -71,6 +74,6 @@ The token is used only for that run and is never written to the repository. GitH
 
 ## Notes
 
-- The game is tuned for a desktop browser with a keyboard. It also scales down for smaller screens.
+- The game is tuned for a desktop browser with a keyboard, and includes an on-screen touch pad for phones and tablets. It also scales down for smaller screens.
 - If your browser blocks `localStorage` (for example in a strict private mode), the game still works but records will not persist.
 - Modern Chrome, Edge or Firefox is recommended.
