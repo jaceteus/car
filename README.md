@@ -51,6 +51,7 @@ On phones and tablets, an on-screen control pad appears during the race: steer w
 - Six hand-built circuits: Pine Valley, Sunburn Strip, Dockside, Midnight Run, Sidewinder and Karelia Ring.
 - **Karelia Ring** is a Finnish forest circuit with a jump ramp on the long straight. Faster cars launch into the air and land with a puff of dust.
 - **Garage:** choose a Formula, Rally, Supra MK4 or Lamborghini, then paint it with a preset colour or your own custom colour. Each car has different speed, grip and off-road behaviour, with stat bars shown in the garage.
+- **Manual tuning:** every car has a pool of 15 tuning points. Spend them yourself on top speed, acceleration, grip or braking — up to 5 points per area — and the changes apply immediately to the car's handling.
 - **Test Airfield:** a large open runway/apron facility with no rivals, no laps and no racing line. It includes a skid pad, parked aircraft and live telemetry for top speed, drift angle and surface.
 - Retro top-down pixel-style presentation, rendered entirely in Canvas, with distinct bodywork for every car type.
 - Slippery drift handling with a handbrake, tyre marks, dust and collision sparks.
@@ -58,7 +59,7 @@ On phones and tablets, an on-screen control pad appears during the race: steer w
 - Three AI rivals with selectable Rookie, Pro and Ace skill levels.
 - Two-, three- or five-lap races, lap timing, live standings and persistent track records.
 - Procedural engine audio, tyre squeal and race beeps using the Web Audio API.
-- Car choice, paint, settings and local records are saved in `localStorage`.
+- Car choice, paint, tuning setup, settings and local records are saved in `localStorage`.
 - No build step and no third-party libraries.
 
 ## Project layout

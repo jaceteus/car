@@ -1072,6 +1072,8 @@ kbd.wide {
 .garage-close:focus-visible,
 .car-type-card:focus-visible,
 .color-swatch:focus-visible,
+.tune-step:focus-visible,
+.tune-reset:focus-visible,
 .custom-color:focus-within {
   outline: 2px solid var(--cyan);
   outline-offset: 2px;
@@ -1251,6 +1253,11 @@ kbd.wide {
   color: var(--cream);
 }
 
+.garage-stat-head em {
+  color: var(--yellow);
+  font-style: normal;
+}
+
 .garage-stat-track {
   height: 4px;
   background: rgba(244, 236, 217, 0.09);
@@ -1340,8 +1347,147 @@ kbd.wide {
   line-height: 1.5;
 }
 
+.tune-panel {
+  grid-column: 1 / -1;
+  padding: 8px 11px 7px;
+  border: 1px solid rgba(244, 236, 217, 0.13);
+  background: rgba(244, 236, 217, 0.025);
+}
+
+.tune-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(244, 236, 217, 0.08);
+}
+
+.tune-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tune-points {
+  color: #7d8985;
+  font-family: var(--mono);
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.tune-points b {
+  color: var(--yellow);
+  font-size: 10px;
+}
+
+.tune-points.empty b {
+  color: var(--red);
+}
+
+.tune-rows {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px 16px;
+  padding: 7px 0 5px;
+}
+
+.tune-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.tune-name {
+  flex: 1 0 100%;
+  overflow: hidden;
+  color: #a7b1ad;
+  font-family: var(--mono);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tune-pips {
+  display: flex;
+  gap: 3px;
+}
+
+.tune-pips i {
+  width: 9px;
+  height: 4px;
+  background: rgba(244, 236, 217, 0.13);
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+
+.tune-pips i.on {
+  background: var(--yellow);
+  box-shadow: 0 0 5px rgba(255, 212, 71, 0.45);
+}
+
+.tune-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tune-step {
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  padding: 0;
+  border: 1px solid rgba(244, 236, 217, 0.22);
+  color: var(--cream);
+  background: rgba(244, 236, 217, 0.05);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.tune-step:hover:not(:disabled) {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: rgba(255, 212, 71, 0.1);
+}
+
+.tune-step:disabled {
+  opacity: 0.26;
+  cursor: default;
+}
+
+.tune-reset {
+  padding: 2px 7px;
+  border: 1px solid rgba(244, 236, 217, 0.18);
+  color: #8c9994;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.tune-reset:hover:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.tune-reset:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 .garage-done {
-  margin-top: 0;
+  margin-top: 12px;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1827,6 +1973,55 @@ body.touch-ui .touch-controls:not(.hidden) {
   }
 }
 
+@media (max-height: 780px) {
+  .garage-header {
+    padding-bottom: 9px;
+  }
+
+  .garage-header h2 {
+    font-size: clamp(28px, 3.2vw, 42px);
+  }
+
+  .garage-body {
+    gap: 10px 18px;
+    padding-top: 11px;
+  }
+
+  .preview-stage {
+    height: clamp(130px, 22vh, 190px);
+  }
+
+  .garage-current {
+    margin-top: 8px;
+  }
+
+  .color-swatches {
+    margin-top: 6px;
+  }
+
+  .garage-stats {
+    margin-top: 9px;
+    padding-top: 8px;
+  }
+
+  .garage-blurb {
+    margin: 8px 0;
+    padding: 7px 9px;
+  }
+
+  .tune-panel {
+    padding: 7px 10px 6px;
+  }
+
+  .tune-rows {
+    padding: 5px 0 4px;
+  }
+
+  .garage-done {
+    margin-top: 9px;
+  }
+}
+
 @media (max-height: 640px) {
   .intro,
   .control-deck,
@@ -1917,6 +2112,10 @@ body.touch-ui .touch-controls:not(.hidden) {
   }
 
   .garage-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tune-rows {
     grid-template-columns: 1fr 1fr;
   }
 }

@@ -418,6 +418,16 @@
     },
   };
 
+  /* Manual tuning: the player distributes a fixed pool of points. */
+  const TUNE_POINTS = 15;
+  const TUNE_MAX_PER_STAT = 5;
+  const TUNE_STATS = [
+    { id: 'speed', label: 'TOP SPEED', gain: 0.032 },
+    { id: 'accel', label: 'ACCELERATION', gain: 0.042 },
+    { id: 'grip', label: 'GRIP', gain: 0.036 },
+    { id: 'brakes', label: 'BRAKING', gain: 0.042 },
+  ];
+
   const CAR_COLORS = [
     '#ffd447', '#ef4e42', '#ff8a3d', '#f1e7d0',
     '#24282f', '#aeb7ba', '#4fbdec', '#38b8a8',
@@ -1889,6 +1899,7 @@
   let totalLaps = 3;
   let difficultyKey = 'pro';
   let playerCarType = 'supra';
+  const carTuning = { speed: 0, accel: 0, grip: 0, brakes: 0 };
   let playerColor = PLAYER.color;
   let playerAccent = PLAYER.accent;
   let garageOpen = false;
@@ -1949,6 +1960,128 @@
 
   function getPlayerCarSpec() {
     return CAR_TYPES[playerCarType] || CAR_TYPES.supra;
+  }
+
+  function tunePointsSpent() {
+    return TUNE_STATS.reduce((sum, stat) => sum + carTuning[stat.id], 0);
+  }
+
+  function tunePointsLeft() {
+    return TUNE_POINTS - tunePointsSpent();
+  }
+
+  function tunedStats() {
+    const base = getPlayerCarSpec().stats;
+    return {
+      speed: base.speed + carTuning.speed,
+      accel: base.accel + carTuning.accel,
+      grip: base.grip + carTuning.grip,
+      brakes: base.brakes + carTuning.brakes,
+    };
+  }
+
+  function tunedMaxSpeed() {
+    return getPlayerCarSpec().maxSpeed * tuneGain('speed');
+  }
+
+  function tuneGain(id) {
+    const stat = TUNE_STATS.find((entry) => entry.id === id);
+    return stat ? 1 + stat.gain * carTuning[id] : 1;
+  }
+
+  function loadTuning() {
+    let stored = null;
+    try {
+      stored = JSON.parse(readStore('tuning', '{}'));
+    } catch (err) {
+      stored = null;
+    }
+    if (!stored || typeof stored !== 'object') stored = {};
+
+    TUNE_STATS.forEach((stat) => {
+      const value = Math.round(Number(stored[stat.id]));
+      carTuning[stat.id] = clamp(Number.isFinite(value) ? value : 0, 0, TUNE_MAX_PER_STAT);
+    });
+
+    /* Never trust old or hand-edited saves: trim any overflow. */
+    let overflow = tunePointsSpent() - TUNE_POINTS;
+    while (overflow > 0) {
+      const biggest = TUNE_STATS.reduce((a, b) => (carTuning[b.id] > carTuning[a.id] ? b : a));
+      if (carTuning[biggest.id] <= 0) break;
+      carTuning[biggest.id] -= 1;
+      overflow -= 1;
+    }
+  }
+
+  function saveTuning() {
+    writeStore('tuning', JSON.stringify(carTuning));
+  }
+
+  function setTunePoint(id, delta) {
+    if (!(id in carTuning)) return;
+    if (delta > 0 && tunePointsLeft() <= 0) {
+      showToast('NO TUNE POINTS LEFT');
+      return;
+    }
+    const next = clamp(carTuning[id] + delta, 0, TUNE_MAX_PER_STAT);
+    if (next === carTuning[id]) return;
+    carTuning[id] = next;
+    saveTuning();
+    refreshGarage();
+  }
+
+  function resetTuning() {
+    if (tunePointsSpent() === 0) return;
+    TUNE_STATS.forEach((stat) => { carTuning[stat.id] = 0; });
+    saveTuning();
+    refreshGarage();
+  }
+
+  function buildTuneRows() {
+    const wrap = $('tuneRows');
+    wrap.innerHTML = '';
+    TUNE_STATS.forEach((stat) => {
+      const row = document.createElement('div');
+      row.className = 'tune-row';
+      row.innerHTML = `
+        <span class="tune-name">${stat.label}</span>
+        <span class="tune-pips" data-pips="${stat.id}" aria-hidden="true">${'<i></i>'.repeat(TUNE_MAX_PER_STAT)}</span>
+        <span class="tune-stepper">
+          <button class="tune-step" type="button" data-stat="${stat.id}" data-step="-1" aria-label="Remove ${stat.label} point">−</button>
+          <button class="tune-step" type="button" data-stat="${stat.id}" data-step="1" aria-label="Add ${stat.label} point">+</button>
+        </span>
+      `;
+      wrap.appendChild(row);
+    });
+
+    wrap.addEventListener('click', (event) => {
+      const button = event.target.closest('.tune-step');
+      if (!button) return;
+      setTunePoint(button.dataset.stat, Number(button.dataset.step));
+    });
+    $('tuneReset').addEventListener('click', resetTuning);
+    syncTuneUI();
+  }
+
+  function syncTuneUI() {
+    const left = tunePointsLeft();
+    const leftEl = $('tunePointsLeft');
+    leftEl.textContent = String(left);
+    leftEl.parentElement.classList.toggle('empty', left === 0);
+
+    TUNE_STATS.forEach((stat) => {
+      const value = carTuning[stat.id];
+      document.querySelectorAll(`[data-pips="${stat.id}"] i`).forEach((pip, index) => {
+        pip.classList.toggle('on', index < value);
+      });
+      const minus = document.querySelector(`.tune-step[data-stat="${stat.id}"][data-step="-1"]`);
+      const plus = document.querySelector(`.tune-step[data-stat="${stat.id}"][data-step="1"]`);
+      if (minus) minus.disabled = value <= 0;
+      if (plus) plus.disabled = value >= TUNE_MAX_PER_STAT || left <= 0;
+    });
+
+    const resetButton = $('tuneReset');
+    if (resetButton) resetButton.disabled = tunePointsSpent() === 0;
   }
 
   function syncTrackUI() {
@@ -2123,19 +2256,24 @@
     refreshCarTypeIcons();
     syncColorSwatches();
 
+    const stats = tunedStats();
     const statRows = [
-      ['TOP SPEED', spec.stats.speed],
-      ['ACCELERATION', spec.stats.accel],
-      ['GRIP', spec.stats.grip],
-      ['BRAKING', spec.stats.brakes],
+      ['TOP SPEED', stats.speed, carTuning.speed],
+      ['ACCELERATION', stats.accel, carTuning.accel],
+      ['GRIP', stats.grip, carTuning.grip],
+      ['BRAKING', stats.brakes, carTuning.brakes],
     ];
-    $('garageStats').innerHTML = statRows.map(([label, value]) => `
+    $('garageStats').innerHTML = statRows.map(([label, value, bonus]) => `
       <div class="garage-stat">
-        <div class="garage-stat-head"><span>${label}</span><span>${value}/5</span></div>
-        <div class="garage-stat-track"><i style="width:${value * 20}%"></i></div>
+        <div class="garage-stat-head">
+          <span>${label}</span>
+          <span>${value}/10${bonus > 0 ? ` <em>+${bonus}</em>` : ''}</span>
+        </div>
+        <div class="garage-stat-track"><i style="width:${clamp(value, 0, 10) * 10}%"></i></div>
       </div>
     `).join('');
 
+    syncTuneUI();
     drawGaragePreview();
   }
 
@@ -2352,12 +2490,12 @@
       accent: playerAccent,
       name: PLAYER.name,
       number: 1,
-      maxSpeed: spec.maxSpeed,
-      accel: spec.accel,
-      brakeForce: spec.brakeForce,
+      maxSpeed: spec.maxSpeed * tuneGain('speed'),
+      accel: spec.accel * tuneGain('accel'),
+      brakeForce: spec.brakeForce * tuneGain('brakes'),
       turnRate: spec.turnRate,
-      gripRoad: spec.gripRoad,
-      gripGrass: spec.gripGrass,
+      gripRoad: spec.gripRoad * tuneGain('grip'),
+      gripGrass: spec.gripGrass * (1 + (tuneGain('grip') - 1) * 0.55),
       offroadSpeed: spec.offroadSpeed,
       offroadTraction: spec.offroadTraction,
       handbrakeGrip: spec.handbrakeGrip,
@@ -2373,7 +2511,7 @@
     const width = geom.width;
     const gridBack = [52, 52, 108, 108];
     const gridSide = [-0.18, 0.18, -0.18, 0.18];
-    const aiBaseSpeed = Math.max(455, getPlayerCarSpec().maxSpeed * 0.98);
+    const aiBaseSpeed = Math.max(455, tunedMaxSpeed() * 0.98);
     const cars = [];
 
     for (let i = 0; i < 3; i++) {
@@ -4559,6 +4697,7 @@
 
     const storedCarType = readStore('carType', 'supra');
     playerCarType = CAR_TYPES[storedCarType] ? storedCarType : 'supra';
+    loadTuning();
     playerColor = normalizeHexColor(readStore('carColor', PLAYER.color), PLAYER.color);
     playerAccent = accentForPaint(playerColor);
 
@@ -4569,6 +4708,7 @@
 
     buildTrackList();
     buildCarTypeList();
+    buildTuneRows();
     buildColorSwatches();
     syncCarUI();
     syncOptionUI();
